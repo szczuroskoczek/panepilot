@@ -1,0 +1,14 @@
+{
+	"include": ["src/**/*", "index.d.ts"],
+	"compilerOptions": {
+		"target": "ESNext",
+		"module": "commonjs",
+		"moduleResolution": "node",
+		"allowJs": true,
+		"esModuleInterop": true,
+		"baseUrl": ".",
+		"paths": {
+			"$native": ["index.d.ts"]
+		}
+	}
+}
