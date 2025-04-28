@@ -1,3 +1,5 @@
-import { sum } from "$native";
+import { registerHotkey,  Modifiers } from "$native";
 
-console.log(sum(1, 2));
+registerHotkey(Modifiers.Alt, 0x41, () => {
+	console.log("Hello from hotkey");
+});
