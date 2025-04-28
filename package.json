@@ -1,16 +1,17 @@
 {
   "name": "panepilot",
   "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
   "scripts": {
     "dev": "node -r @swc-node/register --watch src/index.ts"
   },
   "keywords": [],
-  "author": "",
+  "author": "Krystian Mikołajczyk",
   "license": "MIT",
   "devDependencies": {
-    "@swc-node/core": "^1.13.3",
     "@swc-node/register": "^1.10.10"
-  }
+  },
+  "dependencies": {
+    "iohook": "^0.9.2"
+  },
+  "pnpm": {}
 }
