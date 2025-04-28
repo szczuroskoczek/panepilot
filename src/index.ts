@@ -5,7 +5,7 @@ import {
 	registerAltRelease,
 } from "$native";
 
-const wv = openWebview("test", 200, 400);
+const wv = openWebview("test", 400, 400);
 
 let visible = false;
 registerHotkey(Modifiers.Alt, 0x41, () => {
@@ -13,7 +13,6 @@ registerHotkey(Modifiers.Alt, 0x41, () => {
 	wv.setVisible(true);
 	visible = true;
 	registerAltRelease(() => {
-		console.log("alt released");
 		wv.setVisible(false);
 		visible = false;
 	});

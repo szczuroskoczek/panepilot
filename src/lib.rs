@@ -92,7 +92,7 @@ impl Task for HotkeyListener {
         format!("Failed to register hotkey: {}", error),
       ));
     }
-    println!("Hotkey registered successfully (ID: {})", self.hotkey_id);
+    // println!("Hotkey registered successfully (ID: {})", self.hotkey_id);
 
     let mut msg = MSG::default();
     loop {
@@ -211,10 +211,10 @@ pub fn register_hotkey(env: Env, modifier: Modifiers, vk: u32, callback: JsFunct
     tsfn, // Move the threadsafe function into the task
   })?; // This returns a Promise<void> in JS
 
-  println!(
-    "Attempting to register hotkey (ID: {}, Modifiers: 0x{:X}, VK: 0x{:X}) and spawn listener task.",
-    id, modifier_flags, vk
-  );
+  // println!(
+  //   "Attempting to register hotkey (ID: {}, Modifiers: 0x{:X}, VK: 0x{:X}) and spawn listener task.",
+  //   id, modifier_flags, vk
+  // );
   Ok(()) // Return Ok(()) to indicate the spawning was successful (JS gets a Promise)
 }
 
@@ -274,6 +274,7 @@ pub fn open_webview(title: String, width: i32, height: i32) -> Result<WebviewHan
       .content(Content::Html("<h1>Hello world!</h1>"))
       .size(width, height)
       .resizable(false)
+      .frameless(true)
       .debug(false)
       .user_data(())
       .invoke_handler(|_webview, _arg| Ok(()))
