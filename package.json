@@ -1,19 +1,42 @@
 {
 	"name": "panepilot",
 	"version": "1.0.0",
+	"main": "index.js",
+	"types": "index.d.ts",
 	"os": [
 		"win32"
 	],
 	"scripts": {
-		"dev": "node -r @swc-node/register --watch src/index.ts"
+		"dev": "node -r @swc-node/register --watch src/index.ts",
+		"artifacts": "napi artifacts",
+		"build": "napi build --platform --release",
+		"build:debug": "napi build --platform",
+		"prepublishOnly": "napi prepublish -t npm",
+		"test": "ava",
+		"universal": "napi universal",
+		"version": "napi version"
 	},
 	"keywords": [],
 	"author": "Krystian Mikołajczyk",
+	"napi": {
+		"name": "panepilot",
+		"triples": {
+			"defaults": false,
+			"additional": [
+				"x86_64-pc-windows-msvc"
+			]
+		}
+	},
 	"license": "MIT",
 	"devDependencies": {
 		"@swc-node/register": "^1.10.10",
-		"@napi-rs/cli": "^2.18.4"
+		"@napi-rs/cli": "^2.18.4",
+		"ava": "^6.0.1"
 	},
-	"dependencies": {},
-	"pnpm": {}
+	"ava": {
+		"timeout": "3m"
+	},
+	"engines": {
+		"node": ">= 10"
+	}
 }
