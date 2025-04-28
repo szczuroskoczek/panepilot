@@ -5,7 +5,6 @@
 		"win32"
 	],
 	"scripts": {
-		"build:napi": "napi build --release",
 		"dev": "node -r @swc-node/register --watch src/index.ts"
 	},
 	"keywords": [],
@@ -16,13 +15,5 @@
 		"@napi-rs/cli": "^2.18.4"
 	},
 	"dependencies": {},
-	"pnpm": {},
-	"napi": {
-		"triples": {
-			"defaults": true,
-			"additional": [
-				"x86_64-pc-windows-msvc"
-			]
-		}
-	}
+	"pnpm": {}
 }
