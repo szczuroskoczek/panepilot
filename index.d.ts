@@ -16,4 +16,5 @@ export declare class WebviewHandle {
   exit(): void
   setTitle(title: string): void
   setVisible(visible: boolean): void
+  setHtml(html: string): void
 }

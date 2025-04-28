@@ -261,6 +261,25 @@ impl WebviewHandle {
     }
     Ok(())
   }
+
+  #[napi]
+  pub fn set_html(&self, html: String) -> Result<()> {
+    if let Some(handle) = self.handle.lock().unwrap().clone() {
+      let _ = handle.dispatch(move |webview| {
+        // code below performs a redirect. bug or bad docs?
+        // webview.set_html(&html).unwrap_or_else(|e| {
+        //   eprintln!("Failed to set HTML in webview: {:?}", e);
+        // });
+        let escaped_html = serde_json::to_string(&html).unwrap();
+        let js_code = format!("document.documentElement.innerHTML = {};", escaped_html);
+        webview.eval(&js_code).unwrap_or_else(|e| {
+          eprintln!("Failed to set HTML in webview: {:?}", e);
+        });
+        Ok(())
+      });
+    }
+    Ok(())
+  }
 }
 
 #[napi]
