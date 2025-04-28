@@ -1,9 +1,6 @@
 name: Build iohook for Windows (Node.js v22)
 
 on:
-  push:
-    branches:
-      - main  # Trigger the action on push to the main branch
   workflow_dispatch:  # Allows manual triggering
 
 jobs:
@@ -11,9 +8,9 @@ jobs:
     runs-on: windows-latest  # Use the latest Windows runner
     
     steps:
-    # Step 1: Checkout the repository
-    - name: Checkout repository
-      uses: actions/checkout@v3
+    # Step 1: Clone the iohook repository
+    - name: Clone iohook repository
+      run: git clone https://github.com/wilix-team/iohook.git
 
     # Step 2: Set up Node.js v22
     - name: Set up Node.js v22
@@ -22,12 +19,14 @@ jobs:
         node-version: '22'
 
     # Step 3: Install dependencies
-    - name: Install dependencies
+    - name: Install dependencies for iohook
+      working-directory: iohook
       run: npm install
 
     # Step 4: Build iohook for Windows (and any other necessary build steps)
     - name: Build iohook
-      run: npm run build  # You might need to adjust the build command based on iohook's setup
+      working-directory: iohook
+      run: npm run build  # Adjust this command if necessary (some repos may have a custom build script)
 
     # Step 5: Create a Release
     - name: Create Release
@@ -35,6 +34,6 @@ jobs:
       uses: softprops/action-gh-release@v1
       with:
         files: |
-          ./build/Release/iohook.node  # Adjust the path if needed, make sure this is the built file
+          ./iohook/build/Release/iohook.node  # Adjust path if necessary based on iohook's output folder
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
