@@ -1,16 +1,28 @@
 {
 	"name": "panepilot",
 	"version": "1.0.0",
-	"os": ["win32"],
+	"os": [
+		"win32"
+	],
 	"scripts": {
+		"build:napi": "napi build --release",
 		"dev": "node -r @swc-node/register --watch src/index.ts"
 	},
 	"keywords": [],
 	"author": "Krystian Mikołajczyk",
 	"license": "MIT",
 	"devDependencies": {
-		"@swc-node/register": "^1.10.10"
+		"@swc-node/register": "^1.10.10",
+		"@napi-rs/cli": "^2.18.4"
 	},
 	"dependencies": {},
-	"pnpm": {}
+	"pnpm": {},
+	"napi": {
+		"triples": {
+			"defaults": true,
+			"additional": [
+				"x86_64-pc-windows-msvc"
+			]
+		}
+	}
 }

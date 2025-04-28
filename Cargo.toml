@@ -1,6 +1,16 @@
 [package]
 name = "panepilot"
-version = "0.1.0"
-edition = "2024"
+version = "1.0.0"
+edition = "2021"
+build = "build.rs"
+
+[lib]
+name = "panepilot"
+crate-type = ["cdylib"]
 
 [dependencies]
+napi = "2"
+napi-derive = "2"
+
+[build-dependencies]
+napi-build = "2"
