@@ -11,6 +11,7 @@ export const enum Modifiers {
 }
 export declare function registerHotkey(modifier: Modifiers, vk: number, callback: (...args: any[]) => any): void
 export declare function openWebview(title: string, width: number, height: number): WebviewHandle
+export declare function registerAltRelease(callback: (...args: any[]) => any): void
 export declare class WebviewHandle {
   exit(): void
   setTitle(title: string): void

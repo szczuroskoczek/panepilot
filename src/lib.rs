@@ -6,19 +6,19 @@ use std::u32;
 
 // Import ErrorStrategy specifically
 use napi::threadsafe_function::{ErrorStrategy, ThreadsafeFunction, ThreadsafeFunctionCallMode};
-use napi::{CallContext, Env, JsFunction, JsObject, JsUndefined, NapiRaw, Result, Task}; // Added NapiRaw for JsFunction context
+use napi::{
+  CallContext, Env, Error as NapiError, JsFunction, JsObject, JsUndefined, NapiRaw, Result, Task,
+}; // Added NapiRaw for JsFunction context
 use napi_derive::napi;
 
 // pull hotkey registration from the KeyboardAndMouse module:
 use windows::Win32::UI::Input::KeyboardAndMouse::{
-  HOT_KEY_MODIFIERS,
-  RegisterHotKey,
-  UnregisterHotKey,
-  VK_F24, // Added VK_F24 just as an example if needed
+  HOT_KEY_MODIFIERS, RegisterHotKey, UnregisterHotKey, VK_F24, VK_MENU,
 };
 // pull message-loop pieces and WM_HOTKEY from WindowsAndMessaging:
 use windows::Win32::UI::WindowsAndMessaging::{
-  DispatchMessageW, GetMessageW, MSG, PostThreadMessageW, TranslateMessage, WM_HOTKEY, WM_QUIT,
+  DispatchMessageW, GetMessageW, KBDLLHOOKSTRUCT_FLAGS, MSG, PostThreadMessageW, TranslateMessage,
+  WM_HOTKEY, WM_QUIT,
 };
 // Import necessary windows-rs types
 use windows::core::Error as WinError;
@@ -26,6 +26,18 @@ use windows::core::Result as WinResult;
 
 // Import web_view types
 use web_view::{Content, Handle, WebView, builder}; // Keep Handle
+
+use once_cell::sync::Lazy;
+use std::ptr::null_mut;
+use windows::Win32::Foundation::{HINSTANCE, LPARAM, LRESULT, WPARAM};
+use windows::Win32::System::LibraryLoader::GetModuleHandleW;
+use windows::Win32::System::Threading::GetCurrentThreadId;
+use windows::Win32::UI::WindowsAndMessaging::{
+  CallNextHookEx, HC_ACTION, HHOOK, KBDLLHOOKSTRUCT, SetWindowsHookExW, UnhookWindowsHookEx,
+  WH_KEYBOARD_LL, WM_KEYUP, WM_SYSKEYUP,
+};
+
+use windows::core::PCWSTR;
 
 #[napi]
 pub enum Modifiers {
@@ -278,4 +290,78 @@ pub fn open_webview(title: String, width: i32, height: i32) -> Result<WebviewHan
   Ok(WebviewHandle {
     handle: handle_store,
   })
+}
+
+#[derive(Copy, Clone)]
+struct SafeHhook(HHOOK);
+unsafe impl Send for SafeHhook {}
+unsafe impl Sync for SafeHhook {}
+
+static HOOK_HANDLE: Lazy<Mutex<Option<SafeHhook>>> = Lazy::new(|| Mutex::new(None));
+static CALLBACK: Lazy<Mutex<Option<ThreadsafeFunction<(), ErrorStrategy::CalleeHandled>>>> =
+  Lazy::new(|| Mutex::new(None));
+static HOOK_THREAD_ID: Lazy<Mutex<Option<u32>>> = Lazy::new(|| Mutex::new(None));
+
+extern "system" fn keyboard_proc(code: i32, wparam: WPARAM, lparam: LPARAM) -> LRESULT {
+  unsafe {
+    if code == HC_ACTION as i32 && wparam.0 as u32 == 257 {
+      let kb = *(lparam.0 as *const KBDLLHOOKSTRUCT);
+      if kb.vkCode == 164 {
+        // fire callback once
+        if let Some(tsfn) = CALLBACK.lock().unwrap().take() {
+          let _ = tsfn.call(Ok(()), ThreadsafeFunctionCallMode::NonBlocking);
+        }
+
+        // unhook
+        if let Some(SafeHhook(h)) = HOOK_HANDLE.lock().unwrap().take() {
+          let _ = UnhookWindowsHookEx(h);
+        }
+        // signal thread to exit
+        if let Some(tid) = HOOK_THREAD_ID.lock().unwrap().take() {
+          let _ = PostThreadMessageW(tid, WM_QUIT, WPARAM(0), LPARAM(0));
+        }
+      }
+    }
+    CallNextHookEx(None, code, wparam, lparam)
+  }
+}
+
+#[napi]
+pub fn register_alt_release(_env: Env, callback: JsFunction) -> Result<()> {
+  // prevent double registration
+  if HOOK_HANDLE.lock().unwrap().is_some() {
+    return Err(NapiError::from_reason(
+      "Hook already registered".to_string(),
+    ));
+  }
+  if HOOK_THREAD_ID.lock().unwrap().is_some() {
+    return Err(NapiError::from_reason(
+      "Hook thread already running".to_string(),
+    ));
+  }
+
+  let tsfn = callback.create_threadsafe_function(0, |ctx| Ok(vec![ctx.env.get_undefined()?]))?;
+  *CALLBACK.lock().unwrap() = Some(tsfn);
+
+  thread::spawn(move || unsafe {
+    let tid = GetCurrentThreadId();
+    *HOOK_THREAD_ID.lock().unwrap() = Some(tid);
+    let hmod = GetModuleHandleW(PCWSTR::null()).unwrap_or_default();
+    let hook = SetWindowsHookExW(
+      WH_KEYBOARD_LL,
+      Some(keyboard_proc),
+      Some(HINSTANCE(hmod.0)),
+      0,
+    )
+    .unwrap_or_else(|e| panic!("SetWindowsHookExW failed: {:?}", e));
+    *HOOK_HANDLE.lock().unwrap() = Some(SafeHhook(hook));
+
+    let mut msg = MSG::default();
+    while GetMessageW(&mut msg, None, 0, 0).into() {
+      let _ = TranslateMessage(&msg);
+      DispatchMessageW(&msg);
+    }
+  });
+
+  Ok(())
 }
