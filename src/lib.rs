@@ -80,7 +80,7 @@ impl Task for HotkeyListener {
         _ => {
           // Check if it's our hotkey message
           if msg.message == WM_HOTKEY && msg.wParam.0 as i32 == self.hotkey_id {
-            println!("Hotkey activated (ID: {})", self.hotkey_id); // Added for feedback
+            // println!("Hotkey activated (ID: {})", self.hotkey_id); // Added for feedback
             // fire the JS callback
             // Use NonBlocking to avoid deadlocks if the JS callback takes time or calls back into Rust
             let status = self
