@@ -310,7 +310,9 @@ if (!nativeBinding) {
   throw new Error(`Failed to load native binding`)
 }
 
-const { Modifiers, registerHotkey } = nativeBinding
+const { Modifiers, registerHotkey, WebviewHandle, openWebview } = nativeBinding
 
 module.exports.Modifiers = Modifiers
 module.exports.registerHotkey = registerHotkey
+module.exports.WebviewHandle = WebviewHandle
+module.exports.openWebview = openWebview

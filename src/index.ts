@@ -1,5 +1,9 @@
-import { registerHotkey,  Modifiers } from "$native";
+import { registerHotkey, Modifiers, openWebview } from "$native";
 
 registerHotkey(Modifiers.Alt, 0x41, () => {
-	console.log("Hello from hotkey");
+	const wv = openWebview('test');
+
+	setTimeout(() => {
+		wv.exit();
+	}, 2500);
 });

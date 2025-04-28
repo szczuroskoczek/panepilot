@@ -10,6 +10,7 @@ crate-type = ["cdylib"]
 [dependencies]
 napi = { version = "2.12.2", default-features = false, features = ["napi4"] }
 napi-derive = "2.12.2"
+web-view = "0.7.3"
 windows = { version = "0.61.1", default-features = false, features = [
 	"Win32_Foundation",
 	"Win32_UI_WindowsAndMessaging",

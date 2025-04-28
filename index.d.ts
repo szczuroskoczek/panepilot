@@ -6,7 +6,11 @@
 export const enum Modifiers {
   Alt = 1,
   Control = 2,
-  Shift = 3,
-  Win = 4
+  Shift = 4,
+  Win = 8
 }
 export declare function registerHotkey(modifier: Modifiers, vk: number, callback: (...args: any[]) => any): void
+export declare function openWebview(title: string): WebviewHandle
+export declare class WebviewHandle {
+  exit(): void
+}
