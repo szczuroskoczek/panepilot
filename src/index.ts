@@ -1,9 +1,9 @@
 import { registerHotkey, Modifiers, openWebview } from "$native";
 
-registerHotkey(Modifiers.Alt, 0x41, () => {
-	const wv = openWebview('test');
+const wv = openWebview("test", 200, 400);
 
-	setTimeout(() => {
-		wv.exit();
-	}, 2500);
+let visible = false;
+registerHotkey(Modifiers.Alt, 0x41, () => {
+	wv.setVisible(!visible);
+	visible = !visible;
 });

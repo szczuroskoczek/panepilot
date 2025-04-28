@@ -227,10 +227,32 @@ impl WebviewHandle {
     }
     Ok(())
   }
+
+  #[napi]
+  pub fn set_title(&self, title: String) -> Result<()> {
+    if let Some(handle) = self.handle.lock().unwrap().clone() {
+      let _ = handle.dispatch(move |webview| {
+        let _ = webview.set_title(&title);
+        Ok(())
+      });
+    }
+    Ok(())
+  }
+
+  #[napi]
+  pub fn set_visible(&self, visible: bool) -> Result<()> {
+    if let Some(handle) = self.handle.lock().unwrap().clone() {
+      let _ = handle.dispatch(move |webview| {
+        let _ = webview.set_visible(visible);
+        Ok(())
+      });
+    }
+    Ok(())
+  }
 }
 
 #[napi]
-pub fn open_webview(title: String) -> Result<WebviewHandle> {
+pub fn open_webview(title: String, width: i32, height: i32) -> Result<WebviewHandle> {
   let handle_store: SharedHandle = Arc::new(Mutex::new(None));
   let thread_store = handle_store.clone();
 
@@ -238,11 +260,12 @@ pub fn open_webview(title: String) -> Result<WebviewHandle> {
     let webview = builder()
       .title(&title)
       .content(Content::Html("<h1>Hello world!</h1>"))
-      .size(200, 100)
+      .size(width, height)
       .resizable(false)
       .debug(false)
       .user_data(())
       .invoke_handler(|_webview, _arg| Ok(()))
+      .visible(false)
       .build()
       .unwrap();
 
