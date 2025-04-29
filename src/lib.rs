@@ -293,7 +293,7 @@ pub fn open_webview(title: String, width: i32, height: i32) -> Result<WebviewHan
       .content(Content::Html("<h1>Hello world!</h1>"))
       .size(width, height)
       .resizable(false)
-      .frameless(true)
+      .frameless(true) 
       .debug(false)
       .user_data(())
       .invoke_handler(|_webview, _arg| Ok(()))
